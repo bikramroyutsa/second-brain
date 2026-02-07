@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { saveNote } from "@/lib/actions/db";
+import { saveNote, updateNote } from "@/lib/actions/db";
 
 type Block = {
   id: string;
@@ -24,6 +24,7 @@ export default function NoteEditor({
   const [title, setTitle] = useState(initialTitle);
 
   const [blocks, setBlocks] = useState<Block[]>(
+    
     initialBlocks.length > 0
       ? initialBlocks
       : [{ id: crypto.randomUUID(), type: "text", content: "" }]
@@ -85,7 +86,7 @@ export default function NoteEditor({
   }
 
   async function handleSave() {
-    await saveNote(folderId, title, blocks);
+    await updateNote(noteId, title, blocks);
   }
 
   return (

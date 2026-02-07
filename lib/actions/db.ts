@@ -94,7 +94,6 @@ export async function saveNote(parentFolderID: UUID | null, title: string, block
     } else {
         console.log("Inserted blocks:", insertedBlocks)
     }
-
 }
 
 export async function loadNoteById(noteId: UUID | null){
@@ -113,4 +112,42 @@ export async function loadNoteById(noteId: UUID | null){
         throw new Error(error.message)
     }
     return data;
+}
+export async function updateNote(noteId: string, title: string, blocks: Block[]){
+    const supabase = await createClient()
+    const {data: {user}, error:userError} = await supabase.auth.getUser();
+    if(userError || !user){
+        throw new Error("User not logged in");
+    }
+    const {data:noteData, error: noteError} = await supabase
+                                            .from("notes")
+                                            .update({title})
+                                            .eq("id", noteId)
+                                            .select()
+                                            .single()
+    if(noteError){
+        throw noteError
+    }
+    const { error: deleteError } = await supabase
+        .from("note_blocks")
+        .delete()
+        .eq("note_id", noteId)
+
+    if (deleteError) throw deleteError
+
+    const blocksToInsert = blocks.map((b, index) => ({
+        note_id: noteId,
+        type: b.type || "text",
+        user_id: user.id, 
+        content: b.content,
+        order_index: index,
+    }));
+    const { data: insertedBlocks, error: blocksError } = await supabase
+        .from("note_blocks")
+        .insert(blocksToInsert)
+        .select()
+
+    if (blocksError) throw blocksError
+    
+    return { noteData, insertedBlocks }
 }
