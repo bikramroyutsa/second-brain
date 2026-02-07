@@ -2,6 +2,11 @@
 
 import { UUID } from "crypto";
 import { createClient } from "../supabase/server";
+type Block = {
+  id: string,
+  type: string;
+  content: string
+}
 export async function loadFolders(parentId: UUID | null){
     const supabase = await createClient();
     const {data: {user}, error:userError} = await supabase.auth.getUser();
@@ -56,4 +61,44 @@ export async function loadNoteBlocks(noteId: UUID | null){
     if(error) throw error;
     console.log(data)
     return data;
+}
+export async function saveNote(parentFolderID: UUID | null, title: string, blocks: Block[]){
+    const supabase = await createClient()
+    const {data: {user}, error:userError} = await supabase.auth.getUser();
+    if(userError || !user){
+        throw new Error("User not logged in");
+    }
+    const {data:noteData, error: noteError} = await supabase
+                                        .from("notes")
+                                        .insert({user_id: user.id, folder_id: parentFolderID, title: title})
+                                        .select()
+                                        .single()
+    if(noteError){
+        // console.log(noteError)
+        throw new Error(noteError.message)
+    }else{
+        console.log(noteData)
+    }
+
+    const blocksToInsert = blocks.map((b, index) => ({
+        note_id: noteData.id,
+        type: "text",
+        user_id: user.id,
+        content: b.content,
+        order_index: index,
+        }));
+
+    const { data: insertedBlocks, error: blocksError } = await supabase
+                                                        .from("note_blocks")
+                                                        .insert(blocksToInsert)
+                                                        .select()
+
+    if (blocksError) {
+        console.error(blocksError);
+    } else {
+        console.log("Inserted blocks:", insertedBlocks)
+    }
+
+
+    blocks.forEach
 }

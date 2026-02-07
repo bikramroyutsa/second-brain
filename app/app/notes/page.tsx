@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 export default function Notes(){
     const [currFolder, setCurrFolder] = useState<UUID | null>(null);
     const [currNotes, setCurrNotes] = useState<any[] | null>(null);
-    const [loading, setLoading] = useState(false )
+    const [loading, setLoading] = useState(false)
     useEffect(() => {
     async function fetchNotes() {
       setLoading(true);
@@ -23,7 +23,7 @@ export default function Notes(){
     return(
         <div>
             {loading && <p>loading...</p>}
-            <Link href="/app/notes/new">
+            <Link href={currFolder ? `app/notes/new?folderId=${currFolder}`: "/app/notes/new"}>
                 <button>New note</button>
             </Link>
             {currNotes && currNotes.map(note => (
