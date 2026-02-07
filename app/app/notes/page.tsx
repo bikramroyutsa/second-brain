@@ -11,26 +11,34 @@ export default function Notes(){
     const [currNotes, setCurrNotes] = useState<any[] | null>(null);
     const [loading, setLoading] = useState(false)
     useEffect(() => {
-    async function fetchNotes() {
-      setLoading(true);
-      const notes = await loadNotes(currFolder);
-      setCurrNotes(notes);
-      setLoading(false);
-    }
+        async function fetchNotes() {
+            setLoading(true);
+            const notes = await loadNotes(currFolder);
+            setCurrNotes(notes);
+            setLoading(false);
+        }
 
-    fetchNotes();
-  }, [currFolder]);
+        fetchNotes();
+    }, [currFolder]);
     return(
         <div>
             {loading && <p>loading...</p>}
             <Link href={currFolder ? `app/notes/new?folderId=${currFolder}`: "/app/notes/new"}>
                 <button>New note</button>
             </Link>
-            {currNotes && currNotes.map(note => (
-                <div key={note.id}>
-                {note.title}
-                </div>
-            ))}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {currNotes && currNotes.map(note => (
+                    <Link href={`/app/notes/${note.id}`} key={note.id}>
+                        <div className="w-full bg-[#645050] text-white p-6 rounded-xl aspect-square flex flex-col justify-between hover:bg-[#7a6262] transition-colors cursor-pointer">
+                            <h3 className="text-xl font-semibold truncate">
+                                {note.title || "Untitled"}
+                            </h3>
+                            <span className="text-xs opacity-50">Note</span>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+            
         </div>
     )
 }

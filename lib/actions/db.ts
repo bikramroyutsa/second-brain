@@ -41,25 +41,21 @@ export async function loadNotes(folderId: UUID | null){
     }
     const { data, error } = await query;
     if(error) throw error;
-    console.log(data)
     return data;
 }
-export async function loadNoteBlocks(noteId: UUID | null){
+export async function loadNoteBlocks(noteId: UUID){
     const supabase = await createClient();
     const {data: {user}, error:userError} = await supabase.auth.getUser();
     if(userError || !user){
         throw new Error("User not logged in");
     }
-    let query = supabase.from("note_blocks").select("*").eq("user_id", user.id);
+    let query = supabase
+                .from("note_blocks")
+                .select("*")
+                .eq("note_id", noteId);
 
-    if (noteId === null) {
-        query = query.is("note_id", null);
-    } else {
-        query = query.eq("note_id", noteId);
-    }
     const { data, error } = await query;
     if(error) throw error;
-    console.log(data)
     return data;
 }
 export async function saveNote(parentFolderID: UUID | null, title: string, blocks: Block[]){
@@ -99,6 +95,22 @@ export async function saveNote(parentFolderID: UUID | null, title: string, block
         console.log("Inserted blocks:", insertedBlocks)
     }
 
+}
 
-    blocks.forEach
+export async function loadNoteById(noteId: UUID | null){
+    const supabase = await createClient()
+    const {data: {user}, error:userError} = await supabase.auth.getUser();
+    if(userError || !user){
+        throw new Error("User not logged in");
+    }
+    const {data, error} = await supabase
+                                .from("notes")
+                                .select("*")
+                                .eq("id", noteId)
+                                .single()
+    if(error){
+        console.log(error)
+        throw new Error(error.message)
+    }
+    return data;
 }
