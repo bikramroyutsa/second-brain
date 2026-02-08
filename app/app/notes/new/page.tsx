@@ -10,8 +10,6 @@ type Block = {
 export default function NewNote() {
   const searchParams = useSearchParams()
   const folderId = searchParams.get('folderId')
-  console.log(folderId)
-
   const [title, settitle] = useState("");
   const [blocks, setBlocks] = useState<Block[]>([{id: crypto.randomUUID(), type: "text",content : ""}])
   const refBlock = useRef<{[key: string]: HTMLTextAreaElement | null}>({})

@@ -9,13 +9,7 @@ type Block = {
 }
 export async function loadFolders(parentId: UUID | null){
     const supabase = await createClient();
-    const {data: {user}, error:userError} = await supabase.auth.getUser();
-    console.log(user)
-    if(userError || !user){
-        throw new Error("User not logged in");
-    }
-    let query = supabase.from("folders").select("*").eq("user_id", user.id);
-
+    let query = supabase.from("folders").select("*")
     if (parentId === null) {
         query = query.is("parent_id", null);
     } else {
@@ -28,11 +22,7 @@ export async function loadFolders(parentId: UUID | null){
 }
 export async function loadNotes(folderId: UUID | null){
     const supabase = await createClient();
-    const {data: {user}, error:userError} = await supabase.auth.getUser();
-    if(userError || !user){
-        throw new Error("User not logged in");
-    }
-    let query = supabase.from("notes").select("*").eq("user_id", user.id);
+    let query = supabase.from("notes").select("*")
 
     if (folderId === null) {
         query = query.is("folder_id", null);
