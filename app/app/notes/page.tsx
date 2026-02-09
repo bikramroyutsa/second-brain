@@ -1,48 +1,61 @@
 // check for notes or folders at root
 // then check for notes and folders at each level inside folder
 "use client";
-import { loadFolders, loadNotes } from "@/lib/actions/db";
+import { createNewFolder, loadFolders, loadNotes } from "@/lib/actions/db";
 import { UUID } from "crypto";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Folder, FileText, ChevronLeft } from "lucide-react";
+import NewFolderModal from "@/components/NewFolder";
 
 export default function Notes() {
   const [currFolder, setCurrFolder] = useState< {name: string, id: UUID, parent_id: UUID | null, user_id: UUID | null}| null>(null);
   const [folders, setFolders] = useState<any[] | null>(null)
   const [currNotes, setCurrNotes] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    async function fetchFolders(){
-      setLoading(true)
-      const folders = await loadFolders(currFolder?.id ?? null)
-      // console.log(folders)
-      setFolders(folders)
-      setLoading(false)
-    }
-    async function fetchNotes() {
-      setLoading(true);
-      const notes = await loadNotes(currFolder?.id ?? null);
-      setCurrNotes(notes);
-      setLoading(false);
-    }
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-    fetchNotes();
-    fetchFolders()
+  async function refreshData() {
+    setLoading(true);
+    const [foldersData, notesData] = await Promise.all([
+      loadFolders(currFolder?.id ?? null),
+      loadNotes(currFolder?.id ?? null)
+    ]);
+    setFolders(foldersData);
+    setCurrNotes(notesData);
+    setLoading(false);
+  }
+  useEffect(() => {
+    refreshData()
   }, [currFolder]);
+  const handleCreateFolder = async (name: string) => {
+    await createNewFolder(name, currFolder?.id ?? null)
+    await refreshData()
+  };
   return (
     <div>
+      <NewFolderModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSave={handleCreateFolder} 
+      />
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">
           {currFolder ? <div>{currFolder.name}</div>: <div>Root</div>}
-          
         </div>
         
-        <Link href={currFolder ? `/app/notes/new?folderId=${currFolder.id}` : "/app/notes/new"}>
-          <button className="bg-[#645050] text-white px-4 py-2 rounded-lg hover:bg-[#4a3c3c] transition-colors">
-            + New note
+        <div className="flex gap-2">
+          <button className="bg-[#645050] text-white px-4 py-2 rounded-lg hover:bg-[#4a3c3c] transition-colors"
+            onClick={() => setIsModalOpen(true)}>
+            + New folder
           </button>
-        </Link>
+          <Link href={currFolder ? `/app/notes/new?folderId=${currFolder.id}` : "/app/notes/new"}>
+            <button className="bg-[#645050] text-white px-4 py-2 rounded-lg hover:bg-[#4a3c3c] transition-colors">
+              + New note
+            </button>
+          </Link>
+        </div>
+        
       </div>
 
       {/* {loading && <p className="text-gray-500 italic">loading...</p>} */}

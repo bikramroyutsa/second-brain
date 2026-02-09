@@ -17,7 +17,6 @@ export async function loadFolders(parentId: UUID | null){
     }
     const { data, error } = await query;
     if(error) throw error;
-    console.log(data)
     return data;
 }
 export async function loadNotes(folderId: UUID | null){
@@ -60,10 +59,7 @@ export async function saveNote(parentFolderID: UUID | null, title: string, block
                                         .select()
                                         .single()
     if(noteError){
-        // console.log(noteError)
         throw new Error(noteError.message)
-    }else{
-        console.log(noteData)
     }
 
     const blocksToInsert = blocks.map((b, index) => ({
@@ -80,9 +76,7 @@ export async function saveNote(parentFolderID: UUID | null, title: string, block
                                                         .select()
 
     if (blocksError) {
-        console.error(blocksError);
-    } else {
-        console.log("Inserted blocks:", insertedBlocks)
+        throw blocksError
     }
 }
 
@@ -98,7 +92,6 @@ export async function loadNoteById(noteId: UUID | null){
                                 .eq("id", noteId)
                                 .single()
     if(error){
-        console.log(error)
         throw new Error(error.message)
     }
     return data;
@@ -140,4 +133,16 @@ export async function updateNote(noteId: string, title: string, blocks: Block[])
     if (blocksError) throw blocksError
     
     return { noteData, insertedBlocks }
+}
+export async function createNewFolder(folderName: string, parentId: UUID | null){
+    const supabase = await createClient();
+    const {data: {user}, error: userError} = await supabase.auth.getUser()
+    if(userError || !user){
+        throw new Error("user not logged in")
+    }
+    const {error} = await supabase.from("folders")
+                            .insert({user_id: user.id, parent_id: parentId, name: folderName})
+    if(error){
+        throw error
+    }
 }
