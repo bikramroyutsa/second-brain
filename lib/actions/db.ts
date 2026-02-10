@@ -30,6 +30,7 @@ export async function loadNotes(folderId: UUID | null){
     }
     const { data, error } = await query;
     if(error) throw error;
+    // console.log(data)
     return data;
 }
 export async function loadNoteBlocks(noteId: UUID){
@@ -145,4 +146,12 @@ export async function createNewFolder(folderName: string, parentId: UUID | null)
     if(error){
         throw error
     }
+}
+export async function loadAllNotes(){
+    const supabase = await createClient();
+    let query = supabase.from("notes").select("*")
+    const { data, error } = await query;
+    if(error) throw error;
+    // console.log(data)
+    return data;
 }
