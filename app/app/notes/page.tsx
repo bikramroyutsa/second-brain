@@ -39,6 +39,7 @@ export default function Notes() {
         onClose={() => setIsModalOpen(false)} 
         onSave={handleCreateFolder} 
       />
+      {/* <Search/> */}
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">
           {currFolder ? <div>{currFolder.name}</div>: <div>Root</div>}

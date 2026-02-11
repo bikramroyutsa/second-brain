@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { saveNote, updateNote } from "@/lib/actions/db";
 
 type Block = {
@@ -31,7 +31,15 @@ export default function NoteEditor({
   );
 
   const blockRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
-
+  useEffect(() => {
+    blocks.forEach((block) => {
+      const el = blockRefs.current[block.id];
+      if (el) {
+        el.style.height = "auto";
+        el.style.height = `${el.scrollHeight}px`;
+      }
+    });
+  }, []); // Runs once on mount
   function updateBlock(id: string, content: string) {
     setBlocks(prev =>
       prev.map(b => (b.id === id ? { ...b, content } : b))
