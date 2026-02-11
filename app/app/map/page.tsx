@@ -1,5 +1,5 @@
 'use client'
-import { loadAllNotes } from '@/lib/actions/db';
+import { loadAllNotes, loadLinks } from '@/lib/actions/db';
 import {
   ReactFlow,
   Background,
@@ -14,37 +14,19 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useCallback, useEffect, useState } from 'react';
-const initialNodes = [
-  {
-    id: 'n1',
-    position: { x: 0, y: 0 },
-    data: { label: 'Node 1' },
-  },
-  {
-    id: 'n2',
-    position: { x: 100, y: 100 },
-    data: { label: 'Node 2' },
-  },
-];
-const initialEdges = [
-  {
-    id: 'n1-n2',
-    source: 'n1',
-    target: 'n2',
-    type: 'step',
-    label: 'connects with'
-  },
-];
+import { computeLayout } from './graphLayout';
+import { redirect } from 'next/navigation';
+
 export default function Map() {
-  const [nodes, setNodes] = useState(initialNodes)
-  const [edges, setEdges] = useState(initialEdges)
+  const [nodes, setNodes] = useState<any[]>([])
+  const [edges, setEdges] = useState<any[]>([])
 
   async function loadNodesAndEdges(){
-    const n = await loadAllNotes()
-    const data = n.map((note, index)=>{
+    let [notes, links] = await Promise.all([loadAllNotes(), loadLinks()])
+    notes = notes.map((note, index)=>{
       return{
-        id: note.id, 
-        position: { x: index * 250, y: index * 50 }, 
+        id: String(note.id), 
+        position: { x: 0, y: 0 }, 
         data: { 
           label: note.title,
           userId: note.user_id,
@@ -52,7 +34,19 @@ export default function Map() {
         },
       }
     })
-    setNodes(data)
+    // console.log(links)
+    const edges = links.map((link, index)=>{
+      return{
+        id: `${link.from_note}-${link.to_note}`,
+        source: String(link.from_note),
+        target: String(link.to_note),
+        type: 'simplebezier'
+      }
+    })
+    // console.log(edges)
+    const layoutedNodes = computeLayout(notes, edges);
+    setEdges(edges);
+    setNodes(layoutedNodes);
   
   }
   useEffect(()=>{
@@ -72,13 +66,24 @@ export default function Map() {
     (params: any) => setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
     [],
   );
-
+  function onDoubleClick(event, node){
+    redirect(`/app/notes/${node.id}`)
+  }
+  // function onSingleClick(event, node){
+  //   console.log(node.id)
+  // }
   return (
+    
     <div style={{ width: '100%', height: '100%' }} className='bg-[#ffffff] text-black'>
+      
       <ReactFlow nodes={nodes} edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        nodesDraggable
+        // nodesConnectable= {false
+        // onNodeClick={onSingleClick}
+        onNodeDoubleClick={onDoubleClick}
         fitView
       >
         <Controls />

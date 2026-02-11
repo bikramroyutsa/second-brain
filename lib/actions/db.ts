@@ -155,3 +155,10 @@ export async function loadAllNotes(){
     // console.log(data)
     return data;
 }
+export async function loadLinks(){
+    const supabase = await createClient()
+    const {data, error} = await supabase.from("note_links").select("*")
+    if(error) throw error
+    // console.log(data)
+    return data
+}
