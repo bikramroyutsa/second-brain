@@ -1,5 +1,7 @@
 "use client"
-import { useEffect, useRef } from "react"
+import { searchNote } from "@/lib/actions/db"
+import { useEffect, useRef, useState } from "react"
+import { useDebounce } from "./useDebounce"
 
 export default function Search({
   open,
@@ -9,12 +11,23 @@ export default function Search({
   onClose: () => void
 }) {
   const inputRef = useRef<HTMLTextAreaElement>(null)
-
+  const [query, setQuery] = useState<string>("")
+  const [results, setResults] = useState([])
+  const debouncedQuery = useDebounce(query, 500)
+  async function fetchResults(){
+    const data = await searchNote(debouncedQuery)
+    console.log(data)
+    setResults(data);
+  }
   useEffect(() => {
     if (open) inputRef.current?.focus()
-  }, [open])
+    else return 
+  }, [open, debouncedQuery])
 
-  if (!open) return null
+  useEffect(()=>{
+    if (!debouncedQuery) return
+    fetchResults()
+  }, [debouncedQuery])
 
   return (
     <div
@@ -29,6 +42,8 @@ export default function Search({
           ref={inputRef}
           placeholder="Search notes..."
           className="w-full resize-none rounded-lg border px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+          value={query}
+          onChange={e=>setQuery(e.target.value)}
           onInput={e=>{
             const target = e.target as HTMLTextAreaElement
             target.style.height = "auto"
