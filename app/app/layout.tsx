@@ -21,7 +21,7 @@ export default function RootLayout({
     "rounded-lg px-4 py-2 text-sm font-medium transition-colors text-slate-400 hover:bg-slate-200";
   return (
     <div className="grid h-screen grid-cols-[250px_1fr]">
-      <Search open={openSearch} onClose={()=>setOpenSearch(false)}/>
+      {openSearch && <Search open={openSearch} onClose={()=>setOpenSearch(false)}/>}
       <aside className="border-r p-4">
         <nav className="flex flex-col gap-2">
            <button

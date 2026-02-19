@@ -37,7 +37,9 @@ export async function updateSession(request: NextRequest) {
 
   const user = data?.claims
   if (
-    !user && (request.nextUrl.pathname == "/" 
+    !user && (request.nextUrl.pathname == "/" ||
+          request.nextUrl.pathname.startsWith("/app")
+
     )
   ) {
     // no user, potentially respond by redirecting the user to the login page

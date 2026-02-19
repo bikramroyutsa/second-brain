@@ -164,10 +164,11 @@ export async function loadLinks(){
 }
 export async function searchNote(query: string){
     const supabase = await createClient();
+    query = `"${query}"`
+    console.log(query)
     const { data, error } = await supabase.rpc('search_note', { search_query: query})
     if(error){
         throw error;
     }
-    // console.log(data);
     return data;
 }
