@@ -98,7 +98,7 @@ export default function NoteEditor({
   }
 
   return (
-    <div className="p-12 min-h-screen">
+    <div className="p-6 min-h-screen">
       {/* Title */}
       <div className="flex items-center gap-4 mb-6">
         <input
@@ -115,7 +115,7 @@ export default function NoteEditor({
           Save
         </button>
       </div>
-
+      
       {/* Blocks */}
       <div className="flex flex-col gap-1">
         {blocks.map((block, index) => (

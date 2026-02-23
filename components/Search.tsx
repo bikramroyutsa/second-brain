@@ -1,5 +1,5 @@
 "use client"
-import { searchNote } from "@/lib/actions/db"
+import { searchNote, semanticSearch } from "@/lib/actions/db"
 import { useEffect, useRef, useState } from "react"
 import { useDebounce } from "./useDebounce"
 import Link from "next/link"
@@ -15,11 +15,18 @@ export default function Search({
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const [query, setQuery] = useState<string>("")
   const [results, setResults] = useState<{id: UUID, title: string, matched_content: string}[]>([])
+  const [semanticSearchOn, toggleSemanticSearch] = useState<boolean>(false)
   const debouncedQuery = useDebounce(query, 500)
   async function fetchResults(){
-    const data = await searchNote(debouncedQuery)
-    console.log(data)
-    setResults(data);
+    if(semanticSearchOn){
+      const data = await semanticSearch(debouncedQuery)
+      setResults(data)
+    }else{
+      const data = await searchNote(debouncedQuery)
+      // console.log(data)
+      setResults(data);
+    }
+    
   }
   useEffect(() => {
     if (open) inputRef.current?.focus()
@@ -53,7 +60,23 @@ export default function Search({
             target.style.height = `${target.scrollHeight}px`
           }}
         />
-
+        <div className="flex items-center justify-between px-2 py-3 mt-2">
+          <label className="text-sm font-medium text-gray-400">
+            {semanticSearchOn ? "🤖 Semantic Search On" : "🔍 Standard Search"}
+          </label>
+          <button
+            onClick={() => toggleSemanticSearch(!semanticSearchOn)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+              semanticSearchOn ? "bg-blue-600" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                semanticSearchOn ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
         
       </div>
       <div className="flex flex-col w-full max-w-xl mt-4 rounded-2xl shadow-xl border">
@@ -68,7 +91,24 @@ export default function Search({
             No results found
           </div>
         )}
-        {results && results.map((r, i) => (
+        {semanticSearchOn && results && results.map((r, i) => (
+          <Link
+            href={`/app/notes/${r.note_id}`}
+            key={r.id}
+            className={`block px-4 py-3 transition 
+              hover:bg-gray-100 hover:text-black
+              // ${i !== results.length - 1 ? "border-b" : ""}
+            `}
+          >
+            <div className="font-medium ">{r.title}</div>
+            {r.content && (
+              <div className="text-sm text-gray-500 line-clamp-2">
+                {r.content}
+              </div>
+            )}
+          </Link>
+        ))}
+        {!semanticSearchOn &&results && results.map((r, i) => (
           <Link
             href={`/app/notes/${r.id}`}
             key={r.id}

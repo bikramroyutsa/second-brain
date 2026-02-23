@@ -2,6 +2,7 @@
 
 import { UUID } from "crypto";
 import { createClient } from "../supabase/server";
+import { getEmbedding } from "./embedding";
 type Block = {
   id: string,
   type: string;
@@ -63,13 +64,19 @@ export async function saveNote(parentFolderID: UUID | null, title: string, block
         throw new Error(noteError.message)
     }
 
-    const blocksToInsert = blocks.map((b, index) => ({
-        note_id: noteData.id,
-        type: "text",
-        user_id: user.id,
-        content: b.content,
-        order_index: index,
-        }));
+    const blockPromises = blocks.map(async (b, index) => {
+        const vector = await getEmbedding(b.content);
+
+        return {
+            note_id: noteData.id,
+            type: "text",
+            user_id: user.id,
+            content: b.content,
+            order_index: index,
+            embedding: vector,
+        };
+    });
+    const blocksToInsert = await Promise.all(blockPromises);
 
     const { data: insertedBlocks, error: blocksError } = await supabase
                                                         .from("note_blocks")
@@ -171,4 +178,15 @@ export async function searchNote(query: string){
         throw error;
     }
     return data;
+}
+export async function semanticSearch(query: string){
+    const supabase = await createClient();
+    const queryEmbed  = await getEmbedding(query);
+    const { data: matched_blocks } = await supabase.rpc('match_blocks', {
+        query_embedding: queryEmbed, 
+        match_threshold: 0.78, 
+        match_count: 10,
+    })
+    console.log(matched_blocks)
+    return matched_blocks
 }

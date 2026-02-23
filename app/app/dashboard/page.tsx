@@ -1,5 +1,10 @@
-export default async function Dashboard(){
+'use client'
+import { useState } from "react"
+export default function Dashboard(){
+    const [st, setSt] = useState("")
     return(
-        <div>This is dashboard</div>
+        <div>
+            <div>Dashboard</div>
+        </div>
     )
 }
