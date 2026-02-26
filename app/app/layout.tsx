@@ -8,6 +8,7 @@ const navItems = [
   { name: "Notes", href: "/app/notes" },
   { name: "Map", href: "/app/map" },
   { name: "Quiz", href: "/app/quiz" },
+  {name: "Chat", href: "/app/chat"}
 ];
 
 export default function RootLayout({
