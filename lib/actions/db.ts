@@ -172,7 +172,7 @@ export async function loadLinks(){
 export async function searchNote(query: string){
     const supabase = await createClient();
     query = `"${query}"`
-    console.log(query)
+    // console.log(query)
     const { data, error } = await supabase.rpc('search_note', { search_query: query})
     if(error){
         throw error;
@@ -187,6 +187,6 @@ export async function semanticSearch(query: string){
         match_threshold: 0.78, 
         match_count: 10,
     })
-    console.log(matched_blocks)
+    // console.log(matched_blocks)
     return matched_blocks
 }

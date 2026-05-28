@@ -19,6 +19,7 @@ export async function getResponse(input: string){
         match_threshold: 0.78, 
         match_count: 10,
     })
+    console.log(matched_blocks)
     let contentString = matched_blocks.map((b: Block)=>b.content).join("\n") ?? ""
     const prompt = `
         You are an assistant that answers ONLY using the provided knowledge base.

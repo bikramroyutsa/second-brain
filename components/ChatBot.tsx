@@ -50,17 +50,14 @@ export default function ChatBot() {
 
     const response = await getResponse(input)
     console.log(response)
-    // Simulate bot response (replace with actual API call later)
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: response,
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
-      setIsLoading(false);
-    }, 500);
+    const botMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      text: response,
+      sender: 'bot',
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, botMessage]);
+    setIsLoading(false);
   };
 
   return (
